@@ -1,0 +1,5 @@
+*.res
+*.pdb
+*.obj
+*.o
+.DS_Store
