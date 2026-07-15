@@ -1,5 +1,10 @@
 # Windows 网络配置小工具
 
+## 下载
+
+- [下载 EXE](https://github.com/trowar/windows-network-config-tool/raw/main/dist/WindowsNetworkConfigTool.exe)
+- [下载 ZIP](https://github.com/trowar/windows-network-config-tool/raw/main/dist/WindowsNetworkConfigTool-win-x64.zip)
+
 一个原生 Win32 小工具，用于临时调整 Windows 网络配置。
 
 ## 功能
@@ -19,13 +24,6 @@
   - 成功后按钮变为 `恢复 IPv6`。
 - 关闭软件时自动恢复已修改的 hosts、DNS 和 IPv6。
 - 异常退出后，下次启动会优先使用 `latest-baseline` 恢复 hosts，避免把临时 hosts 误当成新备份。
-
-## 下载
-
-已编译文件位于：
-
-- `dist/WindowsNetworkConfigTool.exe`
-- `dist/WindowsNetworkConfigTool-win-x64.zip`
 
 ## 构建
 
