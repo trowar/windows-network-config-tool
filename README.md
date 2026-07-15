@@ -2,8 +2,8 @@
 
 ## 下载
 
-- [下载 EXE](https://github.com/trowar/windows-network-config-tool/raw/main/dist/WindowsNetworkConfigTool.exe)
-- [下载 ZIP](https://github.com/trowar/windows-network-config-tool/raw/main/dist/WindowsNetworkConfigTool-win-x64.zip)
+- [下载 Windows x86_64 版 ZIP](https://github.com/trowar/windows-network-config-tool/raw/main/dist/WindowsNetworkConfigTool-win-x64.zip)
+- [下载 Windows ARM64 版 ZIP](https://github.com/trowar/windows-network-config-tool/raw/main/dist/WindowsNetworkConfigTool-win-arm64.zip)
 
 一个原生 Win32 小工具，用于临时调整 Windows 网络配置。
 
@@ -31,6 +31,7 @@
 
 ```bash
 brew install mingw-w64
+brew install zig
 ./build-macos.sh
 ```
 

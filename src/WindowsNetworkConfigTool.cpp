@@ -996,10 +996,12 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         case IDC_BUTTON_IPV6:
             try {
                 if (g_ipv6Modified) {
+                    SetText(g_status, L"正在恢复 IPv6，请稍候...");
                     RestoreIpv6();
                     SetText(g_status, L"恢复成功。\r\nIPv6 已重新启用。");
                     UpdateActionButtons();
                 } else {
+                    SetText(g_status, L"正在关闭 IPv6，请稍候...");
                     DisableIpv6(hwnd);
                     UpdateActionButtons();
                 }
