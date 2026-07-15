@@ -420,6 +420,21 @@ static std::wstring GetEditText(HWND hwnd) {
     return text;
 }
 
+static LRESULT CALLBACK SelectAllEditProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    if (msg == WM_KEYDOWN && (wParam == 'A' || wParam == 'a') && (GetKeyState(VK_CONTROL) & 0x8000)) {
+        SendMessageW(hwnd, EM_SETSEL, 0, -1);
+        return 0;
+    }
+
+    WNDPROC original = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    return CallWindowProcW(original, hwnd, msg, wParam, lParam);
+}
+
+static void EnableCtrlASelectAll(HWND edit) {
+    WNDPROC original = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(edit, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(SelectAllEditProc)));
+    SetWindowLongPtrW(edit, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(original));
+}
+
 struct HostsDialogState {
     std::wstring text;
     bool accepted;
@@ -446,6 +461,7 @@ static LRESULT CALLBACK HostsDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
             WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN,
             16, 42, 520, 190, hwnd, (HMENU)IDC_HOSTS_DIALOG_EDIT, NULL, NULL);
         SendMessageW(edit, WM_SETFONT, (WPARAM)mono, TRUE);
+        EnableCtrlASelectAll(edit);
         SetWindowTextW(edit, state->text.c_str());
 
         HWND ok = CreateWindowW(L"BUTTON", L"确定", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 330, 248, 96, 32, hwnd, (HMENU)IDC_HOSTS_DIALOG_OK, NULL, NULL);
@@ -558,6 +574,7 @@ static LRESULT CALLBACK DnsDialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM
             WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN,
             16, 42, 360, 90, hwnd, (HMENU)IDC_DNS_DIALOG_EDIT, NULL, NULL);
         SendMessageW(edit, WM_SETFONT, (WPARAM)mono, TRUE);
+        EnableCtrlASelectAll(edit);
         SetWindowTextW(edit, state->text.c_str());
 
         HWND ok = CreateWindowW(L"BUTTON", L"确定", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 170, 148, 96, 32, hwnd, (HMENU)IDC_DNS_DIALOG_OK, NULL, NULL);
