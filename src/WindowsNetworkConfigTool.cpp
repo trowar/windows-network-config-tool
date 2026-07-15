@@ -364,6 +364,14 @@ static void SetText(HWND hwnd, const std::wstring &text) {
     SetWindowTextW(hwnd, text.c_str());
 }
 
+static void PumpPendingMessages() {
+    MSG msg;
+    while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
+    }
+}
+
 static void AppendLog(const std::wstring &text) {
     if (!g_status) return;
 
@@ -376,6 +384,8 @@ static void AppendLog(const std::wstring &text) {
     SendMessageW(g_status, EM_SETSEL, (WPARAM)len, (LPARAM)len);
     SendMessageW(g_status, EM_REPLACESEL, FALSE, (LPARAM)entry.c_str());
     SendMessageW(g_status, EM_SCROLLCARET, 0, 0);
+    UpdateWindow(g_status);
+    PumpPendingMessages();
 }
 
 static void RefreshHostsModifiedState(bool updateButtons);
@@ -972,6 +982,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             try {
                 RefreshHostsModifiedState(true);
                 if (g_hostsModified) {
+                    AppendLog(L"正在恢复 hosts，请稍候...");
                     RestoreOriginalHosts();
                     std::wstring status = L"恢复成功。\r\n已恢复打开程序时的 hosts 备份。\r\n备份文件：";
                     status += g_backupPath;
@@ -979,6 +990,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                 } else {
                     std::wstring input;
                     if (PromptHostsInput(hwnd, &input)) {
+                        AppendLog(L"正在修改 hosts，请稍候...");
                         ApplyHostsContent(hwnd, input);
                     }
                 }
@@ -991,12 +1003,14 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         case IDC_BUTTON_DNS:
             try {
                 if (g_dnsModified) {
+                    AppendLog(L"正在恢复 DNS，请稍候...");
                     RestoreDns();
                     AppendLog(L"恢复成功。\r\nDNS 已改回自动获取。");
                     UpdateActionButtons();
                 } else {
                     std::wstring dnsInput;
                     if (PromptDnsInput(hwnd, &dnsInput)) {
+                        AppendLog(L"正在修改 DNS，请稍候...");
                         ApplyDns(hwnd, dnsInput);
                         UpdateActionButtons();
                     }
