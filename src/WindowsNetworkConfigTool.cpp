@@ -364,6 +364,20 @@ static void SetText(HWND hwnd, const std::wstring &text) {
     SetWindowTextW(hwnd, text.c_str());
 }
 
+static void AppendLog(const std::wstring &text) {
+    if (!g_status) return;
+
+    int len = GetWindowTextLengthW(g_status);
+    std::wstring entry = text;
+    if (len > 0) {
+        entry = L"\r\n\r\n" + entry;
+    }
+
+    SendMessageW(g_status, EM_SETSEL, (WPARAM)len, (LPARAM)len);
+    SendMessageW(g_status, EM_REPLACESEL, FALSE, (LPARAM)entry.c_str());
+    SendMessageW(g_status, EM_SCROLLCARET, 0, 0);
+}
+
 static void RefreshHostsModifiedState(bool updateButtons);
 
 static void UpdateActionButtons() {
@@ -797,7 +811,7 @@ static void ApplyDns(HWND hwnd, const std::wstring &dnsInput) {
         status += servers[i];
     }
     status += L"\r\n恢复时会改回自动获取 DNS。";
-    SetText(g_status, status);
+    AppendLog(status);
 }
 
 static void RestoreDns() {
@@ -831,7 +845,7 @@ static void DisableIpv6(HWND hwnd) {
     std::wstring status = L"IPv6 关闭成功。\r\n网卡：";
     status += adapterName;
     status += L"\r\n恢复时会重新启用 IPv6。";
-    SetText(g_status, status);
+    AppendLog(status);
 }
 
 static void RestoreIpv6() {
@@ -885,7 +899,7 @@ static void ApplyHostsContent(HWND hwnd, const std::wstring &inputText) {
 
     std::wstring status = L"写入成功。\r\n关闭窗口时会自动恢复 hosts 备份。\r\n\r\n";
     status += Utf8ToWide(data);
-    SetText(g_status, status);
+    AppendLog(status);
     MessageBoxW(hwnd, L"写入成功。", L"完成", MB_OK | MB_ICONINFORMATION);
 }
 
@@ -932,7 +946,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             } else if (removed) {
                 status += L"\r\n检测到上次残留的临时块，本次备份已自动排除它。";
             }
-            SetText(g_status, status);
+            AppendLog(status);
             RefreshHostsModifiedState(true);
             SetTimer(hwnd, IDT_REFRESH_STATE, 1500, NULL);
         } catch (const std::exception &ex) {
@@ -961,7 +975,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                     RestoreOriginalHosts();
                     std::wstring status = L"恢复成功。\r\n已恢复打开程序时的 hosts 备份。\r\n备份文件：";
                     status += g_backupPath;
-                    SetText(g_status, status);
+                    AppendLog(status);
                 } else {
                     std::wstring input;
                     if (PromptHostsInput(hwnd, &input)) {
@@ -978,7 +992,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             try {
                 if (g_dnsModified) {
                     RestoreDns();
-                    SetText(g_status, L"恢复成功。\r\nDNS 已改回自动获取。");
+                    AppendLog(L"恢复成功。\r\nDNS 已改回自动获取。");
                     UpdateActionButtons();
                 } else {
                     std::wstring dnsInput;
@@ -996,12 +1010,12 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         case IDC_BUTTON_IPV6:
             try {
                 if (g_ipv6Modified) {
-                    SetText(g_status, L"正在恢复 IPv6，请稍候...");
+                    AppendLog(L"正在恢复 IPv6，请稍候...");
                     RestoreIpv6();
-                    SetText(g_status, L"恢复成功。\r\nIPv6 已重新启用。");
+                    AppendLog(L"恢复成功。\r\nIPv6 已重新启用。");
                     UpdateActionButtons();
                 } else {
-                    SetText(g_status, L"正在关闭 IPv6，请稍候...");
+                    AppendLog(L"正在关闭 IPv6，请稍候...");
                     DisableIpv6(hwnd);
                     UpdateActionButtons();
                 }
